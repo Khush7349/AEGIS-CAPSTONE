@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: aegis-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - aegis-net
+
+  dashboard-api:
+    build: ./dashboard/backend
+    container_name: aegis-dashboard-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - aegis-net
+
+  dashboard-frontend:
+    build: ./dashboard/frontend
+    container_name: aegis-dashboard-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - dashboard-api
+    networks:
+      - aegis-net
+
+volumes:
+  redis_data:
+
+networks:
+  aegis-net:
